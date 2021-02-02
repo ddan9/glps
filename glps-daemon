@@ -6,31 +6,59 @@
 #                                            #
 ##############################################
 
+loop="1"
+
 skip="sleep 0"
+
+longwait="sleep 600"
 
 use_changing_brightness="1"
 
+	oneshot_brightness="1"
+
+	daemon_brightness="0"
+
 	path_brightness="/sys/class/backlight/intel_backlight/brightness"
 
-	max_brightness="12421"
+	ac_brightness="12421"
 
-	min_brightness="0"
+	battery_brightness="0"
 
-use_samsung_tools="1"
+use_changing_kernel_params="1"
 
-loop="1"
+use_powertop="1"
 
-use_autosuspend="1"
+use_modprobe="1"
 
-	path_battery_percentage="/sys/class/power_supply/BAT1/capacity"
+	use_changing_camera="1"
 
-	min_battery_percentage="5"
+use_wireless_powersaving="1"
 
-wireless_interface="wlp5s0"
+	wireless_interface="wlp5s0"
 
 	use_iw_pm="1"
 
+		use_iw_txpower="1"
+
+			iw_default_txpower="200"
+
+				iw_set_default_txpower="limit 200"
+
+			iw_powersave_txpower="1"
+
+				iw_set_powersave_txpower="auto"
+
 	use_iwconfig_pm="1"
+
+		use_iwconfig_txpower="1"
+
+			iwconfig_default_txpower="200"
+
+				iwconfig_set_default_txpower="2"
+
+			iwconfig_powersave_txpower="1"
+
+				iwconfig_set_powersave_txpower="auto"
 
 use_smt_power_saving="0"
 
@@ -40,9 +68,19 @@ use_rfkill="1"
 
 	use_changing_wifi="1"
 
+		oneshot_wifi="1"
+
+		daemon_wifi="0"
+
 	use_changing_bluetooth="1"
 
+		oneshot_bluetooth="1"
+
+		daemon_bluetooth="1"
+
 use_changing_ipv6="1"
+
+	use_sysctl="1"
 
 use_changing_scsi="1"
 
@@ -64,11 +102,47 @@ use_changing_governor="1"
 
 use_changing_pcie="1"
 
+use_hdparm="1"
+
+	hard_disk="/dev/sda"
+
 use_hal_polling="0"
 
 	hal_polling_device="/dev/cdrom"
 
-longwait="sleep 600"
+use_systemd="1"
+
+	use_laptop_mode_tools="1"
+
+		ac_laptop_mode="0"
+
+		battery_laptop_mode="5"
+
+	use_cpufreqd="1"
+
+	use_samsung_tools="1"
+
+		oneshot_samsung_tools="1"
+
+		daemon_samsung_tools="0"
+
+	use_autosuspend="1"
+
+		path_battery_percentage="/sys/class/power_supply/BAT1/capacity"
+
+		min_battery_percentage="5"
+
+	stop_setvtrgb="1"
+
+	stop_rclocal="1"
+
+	stop_colord="1"
+
+	stop_keyboardsetup="1"
+
+	stop_preload="1"
+
+	stop_avahidaemon="1"
 
 ########################################################
 #                                                      #
@@ -94,15 +168,15 @@ then
 
 	# start changing ac brightness #
 
-	if [ $use_changing_brightness = "1" ]
+	if [ $use_changing_brightness = "1" ] && [ $oneshot_brightness = "1" ]
 
 		then
 
-			if (( $(cat $path_brightness) < $max_brightness ))
+			if (( $(cat $path_brightness) < $ac_brightness ))
 
 				then
 
-					echo $max_brightness > $path_brightness
+					echo $ac_brightness > $path_brightness
 
 				else
 
@@ -118,9 +192,9 @@ then
 
 	# stop changing ac brightness #
 
-	# start unblock wifi #
+	# start unblock wifi using rfkill #
 
-	if [ $use_changing_wifi = "1" ] && [ $use_rfkill = "1" ]
+	if [ $use_rfkill = "1" ] && [ $use_changing_wifi = "1" ] && [ $oneshot_wifi = "1" ]
 
 		then
 
@@ -142,7 +216,49 @@ then
 
 	fi
 
-	# stop unblock wifi #
+	# stop unblock wifi using rfkill #
+
+	# start unblock bluetooth using rfkill #
+
+	if [ $use_rfkill = "1" ] && [ $use_changing_bluetooth = "1" ] && [ $oneshot_bluetooth = "1" ]
+
+		then
+
+			if (( $(rfkill list bluetooth | grep -c "yes") > "0" ))
+
+				then
+
+					sudo rfkill unblock bluetooth
+
+				else
+
+					$skip
+
+			fi
+
+		else
+
+			$skip
+
+	fi
+
+	# stop unblock bluetooth using rfkill #
+
+	# start you can put something here #
+
+	if [ $use_systemd = "1" ]
+
+		then
+
+			$skip
+
+		else
+
+			$skip
+
+	fi
+
+	# end you can put something here #
 
 	############################################
 	#                                          #
@@ -160,15 +276,15 @@ else
 
 	# start changing battery brightness #
 
-	if [ $use_changing_brightness = "1" ]
+	if [ $use_changing_brightness = "1" ] && [ $oneshot_brightness = "1" ]
 
 		then
 
-			if (( $(cat $path_brightness) > $min_brightness ))
+			if (( $(cat $path_brightness) > $battery_brightness ))
 
 				then
 
-					echo $min_brightness > $path_brightness
+					echo $battery_brightness > $path_brightness
 
 				else
 
@@ -184,9 +300,9 @@ else
 
 	# stop changing battery brightness #
 
-	# start block wifi #
+	# start block wifi using rfkill #
 
-	if [ $use_changing_wifi = "1" ] && [ $use_rfkill = "1" ]
+	if [ $use_rfkill = "1" ] && [ $use_changing_wifi = "1" ] && [ $oneshot_wifi = "1" ]
 
 		then
 
@@ -208,31 +324,19 @@ else
 
 	fi
 
-	# stop block wifi #
+	# stop block wifi using rfkill #
 
-	# start samsung-tools service #
+	# start block bluetooth using rfkill #
 
-	if [ $use_samsung_tools = "1" ]
+	if [ $use_rfkill = "1" ] && [ $use_changing_bluetooth = "1" ] && [ $oneshot_bluetooth = "1" ]
 
 		then
 
-			if [[ $(systemctl status samsung-tools.service | grep -c disabled) != "1" ]]
+			if (( $(rfkill list bluetooth | grep -c "no") > "0" ))
 
 				then
 
-					sudo systemctl disable samsung-tools.service
-
-				else
-
-					$skip
-
-			fi
-
-			if [[ $(systemctl status samsung-tools.service | grep -c inactive) = "1" ]]
-
-				then
-
-					sudo systemctl start samsung-tools.service
+					sudo rfkill block bluetooth
 
 				else
 
@@ -246,7 +350,55 @@ else
 
 	fi
 
-	# end of start samsung-tools service #
+	# stop block bluetooth using rfkill #
+
+	if [ $use_systemd = "1" ]
+
+		then
+
+			# start samsung-tools service #
+
+			if [ $use_samsung_tools = "1" ] && [ $oneshot_samsung_tools = "1" ]
+
+				then
+
+					if [[ $(systemctl status samsung-tools.service | grep -c disabled) != "1" ]]
+
+						then
+
+							sudo systemctl disable samsung-tools.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status samsung-tools.service | grep -c inactive) = "1" ]]
+
+						then
+
+							sudo systemctl start samsung-tools.service
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# end of start samsung-tools service #
+
+		else
+
+			$skip
+
+	fi
 
 	#################################################
 	#                                               #
@@ -272,6 +424,344 @@ while [ $loop = "1" ]
 
 do
 
+	#######################################################
+	#                                                     #
+	# Here is start point of pre-anywayshot block of code #
+	#                                                     #
+	#######################################################	
+
+	if [ $use_systemd = "1" ]
+
+		then
+
+			# start use cpufreqd #
+
+			if [ $use_cpufreqd = "1" ]
+
+				then
+
+					if [[ $(systemctl status cpufreqd.service | grep -c disabled) != "1" ]]
+
+						then
+
+							sudo systemctl disable cpufreqd.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status cpufreqd.service | grep -c inactive) = "1" ]]
+
+						then
+
+							sudo systemctl start cpufreqd.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status cpufreqd.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl stop cpufreqd.service
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop use cpufreqd #
+
+			# stop rc-local service #
+
+			if [ $stop_rclocal = "1" ] && [ $(systemctl status rc-local.service | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop rc-local.service
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop rc-local service #
+
+			# stop avahi-daemon service #
+
+			if [ $stop_avahidaemon = "1" ] && [ $(systemctl status avahi-daemon.service | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop avahi-daemon.service
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop avahi-daemon service #
+
+			# stop avahi-daemon socket #
+
+			if [ $stop_avahidaemon = "1" ] && [ $(systemctl status avahi-daemon.socket | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop avahi-daemon.socket
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop avahi-daemon socket #
+
+			# stop keyboard-setup service #
+
+			if [ $stop_keyboardsetup = "1" ] && [ $(systemctl status keyboard-setup.service | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop keyboard-setup.service
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop keyboard-setup service #
+
+			# start use laptop-mode tools
+
+			if [ $use_laptop_mode_tools = "1" ]
+
+				then
+
+					if [[ $(systemctl status laptop-mode.timer | grep -c disabled) != "1" ]]
+
+						then
+
+							sudo systemctl disable laptop-mode.timer
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.service | grep -c "disabled;") != "1" ]]
+
+						then
+
+							sudo systemctl disable laptop-mode.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status lmt-poll.service | grep -c disabled) != "1" ]]
+
+						then
+
+							sudo systemctl disable lmt-poll.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.timer | grep -c inactive) = "1" ]]
+
+						then
+
+							sudo systemctl start laptop-mode.timer
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.service | grep -c inactive) = "1" ]]
+
+						then
+
+							sudo systemctl start laptop-mode.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status lmt-poll.service | grep -c inactive) = "1" ]]
+
+						then
+
+							sudo systemctl start lmt-poll.service
+
+						else
+
+							$skip
+
+					fi
+
+					if on_ac_power;
+
+						then
+
+							if (( $(cat /proc/sys/vm/laptop_mode) != $ac_laptop_mode ))
+
+								then
+
+									echo $ac_laptop_mode > /proc/sys/vm/laptop_mode
+
+								else
+
+									$skip
+
+							fi
+
+						else
+
+							if (( $(cat /proc/sys/vm/laptop_mode) != $battery_laptop_mode ))
+
+								then
+
+									echo $battery_laptop_mode > /proc/sys/vm/laptop_mode
+
+								else
+
+									$skip
+
+							fi
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.timer | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl restart laptop-mode.timer
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl restart laptop-mode.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status lmt-poll.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl restart lmt-poll.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl reload laptop-mode.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.timer | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl stop laptop-mode.timer
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status lmt-poll.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl stop lmt-poll.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status laptop-mode.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl stop laptop-mode.service
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop use laptop-mode-tools
+
+		else
+
+			$skip
+
+	fi
+
+	#####################################################
+	#                                                   #
+	# Here is end point of pre-anywayshot block of code #
+	#                                                   #
+	#####################################################
+
 	if on_ac_power;
 
 	then
@@ -282,25 +772,157 @@ do
 		#                                            #
 		##############################################
 
-		sudo systemctl start laptop-mode.timer
-		sudo systemctl start laptop-mode.service
-		sudo systemctl start lmt-poll.service
-		echo 0 > /proc/sys/vm/laptop_mode
-		sudo systemctl restart laptop-mode.timer
-		sudo systemctl restart laptop-mode.service
-		sudo systemctl restart lmt-poll.service
-		sudo systemctl reload laptop-mode.service
-		sudo systemctl stop laptop-mode.timer
-		sudo systemctl stop lmt-poll.service
-		sudo systemctl stop laptop-mode.service
-		sudo systemctl stop laptop-mode.timer
+		# start changing laptop-mode setting #
 
-		echo 0 > /proc/sys/vm/laptop_mode
-		echo 10 > /proc/sys/vm/dirty_ratio
-		echo 5 > /proc/sys/vm/dirty_background_ratio
-		echo 1000 > /proc/sys/vm/dirty_expire_centisecs
-		echo 1000 > /proc/sys/vm/dirty_writeback_centisecs
-		echo 0 > /sys/module/snd_hda_intel/parameters/power_save
+		if [ $use_laptop_mode_tools = "1" ]
+
+			then
+
+				if (( $(cat /proc/sys/vm/laptop_mode) != $ac_laptop_mode ))
+
+					then
+
+						echo $ac_laptop_mode > /proc/sys/vm/laptop_mode
+
+					else
+
+						$skip
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# stop changing laptop-mode setting #
+
+		# start changing kernel params for ac #
+
+		if [ $use_changing_kernel_params = "1" ]
+
+			then
+
+				if (( $(cat /proc/sys/vm/dirty_ratio) != 10 ))
+
+					then
+
+						echo 10 > /proc/sys/vm/dirty_ratio
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(cat /proc/sys/vm/dirty_background_ratio) != 5 ))
+
+					then
+
+						echo 5 > /proc/sys/vm/dirty_background_ratio
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(cat /proc/sys/vm/dirty_expire_centisecs) != 1000 ))
+
+					then
+
+						echo 1000 > /proc/sys/vm/dirty_expire_centisecs
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(cat /proc/sys/vm/dirty_writeback_centisecs) != 1000 ))
+
+					then
+
+						echo 1000 > /proc/sys/vm/dirty_writeback_centisecs
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(cat /sys/module/snd_hda_intel/parameters/power_save) != 0 ))
+
+					then
+
+						echo 0 > /sys/module/snd_hda_intel/parameters/power_save
+
+					else
+
+						$skip
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# stop changing kernel params for ac #
+
+		# start changing ac brightness #
+
+		if [ $use_changing_brightness = "1" ] && [ $daemon_brightness = "1" ]
+
+			then
+
+				if (( $(cat $path_brightness) < $ac_brightness ))
+
+					then
+
+						echo $ac_brightness > $path_brightness
+
+					else
+
+						$skip
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# stop changing ac brightness #
+
+		# start enable camera with modprobe #
+
+		if [ $use_modprobe = "1" ]
+
+			then
+
+				if [ $use_changing_camera = "1" ] && [ $(ls /dev/ | grep -c "video") = "0" ]
+
+					then
+
+						sudo modprobe uvcvideo
+
+					else
+
+						$skip
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# stop enable camera with modprobe #
 
 		# disable mc power saving #
 
@@ -354,17 +976,49 @@ do
 
 		# end of disable smt power saving #
 
-		# disable power management in iw dev #
-
-		if [ $use_iw_pm = "1" ]
+		if [ $use_wireless_powersaving = "1" ]
 
 			then
 
-				if (( $(iw dev $wireless_interface get power_save | grep -c "off") != 1 ))
+				# disable power management in iw dev #
+
+				if [ $use_iw_pm = "1" ]
 
 					then
 
-						sudo iw dev $wireless_interface set power_save off
+						if (( $(iw dev $wireless_interface get power_save | grep -c "off") != 1 ))
+
+							then
+
+								sudo iw dev $wireless_interface set power_save off
+
+							else
+
+								$skip
+
+						fi
+
+						if [ $use_iw_txpower = "1" ] && (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power:off") != "1" ))
+
+							then
+
+								if (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power=$iw_default_txpower") != "1" ))
+
+									then
+
+										sudo iw dev $wireless_interface set txpower $iw_set_default_txpower
+
+									else
+
+										$skip
+
+								fi
+
+							else
+
+								$skip
+
+						fi
 
 					else
 
@@ -372,25 +1026,47 @@ do
 
 				fi
 
-			else
+				# end of disable power management in iw dev #
 
-				$skip
+				# disable power management in iwconfig #
 
-		fi
-
-		# end of disable power management in iw dev #
-
-		# disable power management in iwconfig #
-
-		if [ $use_iwconfig_pm = "1" ]
-
-			then
-
-				if (( $(iwconfig $wireless_interface | grep -c "Power Management:off") != 1 ))
+				if [ $use_iwconfig_pm = "1" ]
 
 					then
 
-						sudo iwconfig $wireless_interface power off
+						if (( $(iwconfig $wireless_interface | grep -c "Power Management:off") != 1 ))
+
+							then
+
+								sudo iwconfig $wireless_interface power off
+
+							else
+
+								$skip
+
+						fi
+
+						if [ $use_iwconfig_txpower = "1" ] && (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=off") != "1" ))
+
+							then
+
+								if (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=$iwconfig_default_txpower") != "1" ))
+
+									then
+
+										sudo iwconfig $wireless_interface txpower $iwconfig_set_default_txpower
+
+									else
+
+										$skip
+
+								fi
+
+							else
+
+								$skip
+
+						fi
 
 					else
 
@@ -398,13 +1074,13 @@ do
 
 				fi
 
+				# end of disable power management in iwconfig #
+
 			else
 
 				$skip
 
 		fi
-
-		# end of disable power management in iwconfig #
 
 		# start enabling ipv6 #
 
@@ -424,47 +1100,57 @@ do
 
 				fi
 
-				if (( $(sysctl net.ipv6.conf.all.disable_ipv6 | grep -c "1") != 0 ))
+				if [ $use_sysctl = "1" ]
 
 					then
 
-						sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
+						if (( $(sysctl net.ipv6.conf.all.disable_ipv6 | grep -c "1") != 0 ))
 
-					else
+							then
 
-						$skip
+								sudo sysctl -w net.ipv6.conf.all.disable_ipv6=0
 
-				fi
+							else
 
-				if (( $(sysctl net.ipv6.conf.default.disable_ipv6 | grep -c "1") != 0 ))
+								$skip
 
-					then
+						fi
 
-						sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0
+						if (( $(sysctl net.ipv6.conf.default.disable_ipv6 | grep -c "1") != 0 ))
 
-					else
+							then
 
-						$skip
+								sudo sysctl -w net.ipv6.conf.default.disable_ipv6=0
 
-				fi
+							else
 
-				if (( $(sysctl net.ipv6.conf.lo.disable_ipv6 | grep -c "1") != 0 ))
+								$skip
 
-					then
+						fi
 
-						sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=0
+						if (( $(sysctl net.ipv6.conf.lo.disable_ipv6 | grep -c "1") != 0 ))
 
-					else
+							then
 
-						$skip
+								sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=0
 
-				fi
+							else
 
-				if (( $(sysctl net.ipv6.conf.$wireless_interface.disable_ipv6 | grep -c "1") != 0 ))
+								$skip
 
-					then
+						fi
 
-						sudo sysctl -w net.ipv6.conf.$wireless_interface.disable_ipv6=0
+						if (( $(sysctl net.ipv6.conf.$wireless_interface.disable_ipv6 | grep -c "1") != 0 ))
+
+							then
+
+								sudo sysctl -w net.ipv6.conf.$wireless_interface.disable_ipv6=0
+
+							else
+
+								$skip
+
+						fi
 
 					else
 
@@ -576,7 +1262,7 @@ do
 
 		# stop changing ac governor in cpufreq-set #
 
-		# start changing pcie aspm policy on ac
+		# start changing pcie aspm policy on ac #
 
 		if [ $use_changing_pcie = "1" ]
 
@@ -600,11 +1286,9 @@ do
 
 		fi
 
-		# stop changing pcie aspm policy on ac
+		# stop changing pcie aspm policy on ac #
 
-		sudo modprobe -r uvcvideo
-
-		# start enable hal polling on device (experimental function)
+		# start enable hal polling on device (experimental function) #
 
 		if [ $use_hal_polling = "1" ]
 
@@ -618,13 +1302,37 @@ do
 
 		fi
 
-		# stop enable hal polling on device (experimental function)
+		# stop enable hal polling on device (experimental function) #
 
-		sudo hdparm -B 255 -M 254 -S 244 -W 1 /dev/sda
+		# start unblock wifi using rfkill #
 
-		# start unblock bluetooth using rfkill
+		if [ $use_rfkill = "1" ] && [ $use_changing_wifi = "1" ] && [ $daemon_wifi = "1" ]
 
-		if [ $use_changing_bluetooth = "1" ] && [ $use_rfkill = "1" ]
+			then
+
+				if (( $(rfkill list wifi | grep -c "yes") > "0" ))
+
+					then
+
+						sudo rfkill unblock wifi
+
+					else
+
+						$skip
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# stop unblock wifi using rfkill #
+
+		# start unblock bluetooth using rfkill #
+
+		if [ $use_rfkill = "1" ] && [ $use_changing_bluetooth = "1" ] && [ $daemon_bluetooth = "1" ]
 
 			then
 
@@ -646,7 +1354,69 @@ do
 
 		fi
 
-		# stop unblock bluetooth using rfkill
+		# stop unblock bluetooth using rfkill #
+
+		# start disable power saving with hdparm #
+
+		if [ $use_hdparm = "1" ]
+
+			then
+
+				if (( $(sudo hdparm -B $hard_disk | grep -c "= off") != "1" ))
+
+					then
+
+						sudo hdparm -B 255 $hard_disk
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(sudo hdparm -M $hard_disk | grep -c "= 254") != "1" ))
+
+					then
+
+						sudo hdparm -M 254 $hard_disk
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(sudo hdparm -W $hard_disk | grep -c "on") != "1" ))
+
+					then
+
+						sudo hdparm -W 1 $hard_disk
+
+					else
+
+						$skip
+
+				fi
+
+				if (( $(sudo hdparm -C $hard_disk | grep -c "active/idle") != "1" )) || (( $(sudo hdparm -C $hard_disk | grep -c "standby") != "1" ))
+
+					then
+
+						sudo hdparm -S 0 $hard_disk
+
+					else
+
+						$skip
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# stop disable power saving with hdparm #
 
 		############################################
 		#                                          #
@@ -662,7 +1432,9 @@ do
 		#                                                 #
 		###################################################
 
-		if [ $use_autosuspend = "1" ] && (( $(cat $path_battery_percentage) < $min_battery_percentage ))
+		# start of autosuspend feature if battery percentage less than your minimum #
+
+		if [ $use_systemd = "1" ] && [ $use_autosuspend = "1" ] && (( $(cat $path_battery_percentage) < $min_battery_percentage ))
 
 		then
 
@@ -670,27 +1442,225 @@ do
 
 		else
 
-			sudo systemctl start laptop-mode.timer
-			sudo systemctl start laptop-mode.service
-			sudo systemctl start lmt-poll.service
-			echo 5 > /proc/sys/vm/laptop_mode
-			sudo systemctl restart laptop-mode.timer
-			sudo systemctl restart laptop-mode.service
-			sudo systemctl restart lmt-poll.service
-			sudo systemctl reload laptop-mode.service
-			sudo systemctl stop laptop-mode.timer
-			sudo systemctl stop lmt-poll.service
-			sudo systemctl stop laptop-mode.service
-			sudo systemctl stop laptop-mode.timer
+		# end of autosuspend feature if battery percentage less than your minimum #
 
-			sudo powertop --auto-tune
+			# start samsung-tools service #
 
-			echo 5 > /proc/sys/vm/laptop_mode
-			echo 90 > /proc/sys/vm/dirty_ratio
-			echo 1 > /proc/sys/vm/dirty_background_ratio
-			echo 60000 > /proc/sys/vm/dirty_expire_centisecs
-			echo 60000 > /proc/sys/vm/dirty_writeback_centisecs
-			echo 1 > /sys/module/snd_hda_intel/parameters/power_save
+			if [ $use_samsung_tools = "1" ] && [ $daemon_samsung_tools = "1" ]
+
+				then
+
+					if [[ $(systemctl status samsung-tools.service | grep -c disabled) != "1" ]]
+
+						then
+
+							sudo systemctl disable samsung-tools.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status samsung-tools.service | grep -c inactive) = "1" ]]
+
+						then
+
+							sudo systemctl start samsung-tools.service
+
+						else
+
+							$skip
+
+					fi
+
+					if [[ $(systemctl status samsung-tools.service | grep -c inactive) != "1" ]]
+
+						then
+
+							sudo systemctl stop samsung-tools.service
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# end of start samsung-tools service #
+
+			# start use powertop #
+
+			if [ $use_powertop = "1" ]
+
+				then
+
+					sudo powertop -q --auto-tune
+
+				else
+
+					$skip
+
+			fi
+
+			# stop use powertop #
+
+			# start changing laptop-mode setting #
+
+			if [ $use_laptop_mode_tools = "1" ]
+
+				then
+
+					if (( $(cat /proc/sys/vm/laptop_mode) != $battery_laptop_mode ))
+
+						then
+
+							echo $battery_laptop_mode > /proc/sys/vm/laptop_mode
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop changing laptop-mode setting #
+
+			# start changing kernel params for ac #
+
+			if [ $use_changing_kernel_params = "1" ]
+
+				then
+
+					if (( $(cat /proc/sys/vm/dirty_ratio) != 90 ))
+
+						then
+
+							echo 90 > /proc/sys/vm/dirty_ratio
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(cat /proc/sys/vm/dirty_background_ratio) != 1 ))
+
+						then
+
+							echo 1 > /proc/sys/vm/dirty_background_ratio
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(cat /proc/sys/vm/dirty_expire_centisecs) != 60000 ))
+
+						then
+
+							echo 60000 > /proc/sys/vm/dirty_expire_centisecs
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(cat /proc/sys/vm/dirty_writeback_centisecs) != 60000 ))
+
+						then
+
+							echo 60000 > /proc/sys/vm/dirty_writeback_centisecs
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(cat /sys/module/snd_hda_intel/parameters/power_save) != 1 ))
+
+						then
+
+							echo 1 > /sys/module/snd_hda_intel/parameters/power_save
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop changing kernel params for ac #
+
+			# start changing battery brightness #
+
+			if [ $use_changing_brightness = "1" ] && [ $daemon_brightness = "1" ]
+
+				then
+
+					if (( $(cat $path_brightness) > $battery_brightness ))
+
+						then
+
+							echo $battery_brightness > $path_brightness
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop changing battery brightness #
+
+			# start disable camera with modprobe #
+
+			if [ $use_modprobe = "1" ]
+
+				then
+
+					if [ $use_changing_camera = "1" ] && [ $(ls /dev/ | grep -c "video") != 0 ]
+
+						then
+
+							sudo modprobe -r uvcvideo
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop disable camera with modprobe #
 
 			# enable mc power saving #
 
@@ -744,17 +1714,49 @@ do
 
 			# end of enable smt power saving #
 
-			# enable power management in iw dev #
-
-			if [ $use_iw_pm = "1" ]
+			if [ $use_wireless_powersaving = "1" ]
 
 				then
 
-					if (( $(iw dev $wireless_interface get power_save | grep -c "on") != 1 ))
+					# enable power management in iw dev #
+
+					if [ $use_iw_pm = "1" ]
 
 						then
 
-							sudo iw dev $wireless_interface set power_save on
+							if (( $(iw dev $wireless_interface get power_save | grep -c "on") != 1 ))
+
+								then
+
+									sudo iw dev $wireless_interface set power_save on
+
+								else
+
+									$skip
+
+							fi
+
+							if [ $use_iw_txpower = "1" ] && (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power:off") != "1" ))
+
+								then
+
+									if (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power=$iw_powersave_txpower") != "1" ))
+
+										then
+
+											sudo iw dev $wireless_interface set txpower $iw_set_powersave_txpower
+
+										else
+
+											$skip
+
+									fi
+
+								else
+
+									$skip
+
+							fi
 
 						else
 
@@ -762,25 +1764,47 @@ do
 
 					fi
 
-				else
+					# end of enable power management in iw dev #
 
-					$skip
+					# enable power management in iwconfig #
 
-			fi
-
-			# end of enable power management in iw dev #
-
-			# enable power management in iwconfig #
-
-			if [ $use_iwconfig_pm = "1" ]
-
-				then
-
-					if (( $(iwconfig $wireless_interface | grep -c "Power Management:on") != 1 ))
+					if [ $use_iwconfig_pm = "1" ]
 
 						then
 
-							sudo iwconfig $wireless_interface power on
+							if (( $(iwconfig $wireless_interface | grep -c "Power Management:on") != 1 ))
+
+								then
+
+									sudo iwconfig $wireless_interface power on
+
+								else
+
+									$skip
+
+							fi
+
+							if [ $use_iwconfig_txpower = "1" ] && (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=off") != "1" ))
+
+								then
+
+									if (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=$iwconfig_powersave_txpower") != "1" ))
+
+										then
+
+											sudo iwconfig $wireless_interface txpower $iwconfig_set_powersave_txpower
+
+										else
+
+											$skip
+
+									fi
+
+								else
+
+									$skip
+
+							fi
 
 						else
 
@@ -788,13 +1812,13 @@ do
 
 					fi
 
+					# end of enable power management in iwconfig #
+
 				else
 
 					$skip
 
 			fi
-
-			# end of enable power management in iwconfig #
 
 			# start disabling ipv6 #
 
@@ -814,47 +1838,57 @@ do
 
 					fi
 
-					if (( $(sysctl net.ipv6.conf.all.disable_ipv6 | grep -c "1") != 1 ))
+					if [ $use_sysctl = "1" ]
 
 						then
 
-							sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+							if (( $(sysctl net.ipv6.conf.all.disable_ipv6 | grep -c "1") != 1 ))
 
-						else
+								then
 
-							$skip
+									sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
 
-					fi
+								else
 
-					if (( $(sysctl net.ipv6.conf.default.disable_ipv6 | grep -c "1") != 1 ))
+									$skip
 
-						then
+							fi
 
-							sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+							if (( $(sysctl net.ipv6.conf.default.disable_ipv6 | grep -c "1") != 1 ))
 
-						else
+								then
 
-							$skip
+									sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
 
-					fi
+								else
 
-					if (( $(sysctl net.ipv6.conf.lo.disable_ipv6 | grep -c "1") != 1 ))
+									$skip
 
-						then
+							fi
 
-							sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+							if (( $(sysctl net.ipv6.conf.lo.disable_ipv6 | grep -c "1") != 1 ))
 
-						else
+								then
 
-							$skip
+									sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1
 
-					fi
+								else
 
-					if (( $(sysctl net.ipv6.conf.$wireless_interface.disable_ipv6 | grep -c "1") != 1 ))
+									$skip
 
-						then
+							fi
 
-							sudo sysctl -w net.ipv6.conf.$wireless_interface.disable_ipv6=1
+							if (( $(sysctl net.ipv6.conf.$wireless_interface.disable_ipv6 | grep -c "1") != 1 ))
+
+								then
+
+									sudo sysctl -w net.ipv6.conf.$wireless_interface.disable_ipv6=1
+
+								else
+
+									$skip
+
+							fi
 
 						else
 
@@ -966,7 +2000,7 @@ do
 
 			# stop changing battery governor in cpufreq-set #
 
-			# start changing pcie aspm policy on battery
+			# start changing pcie aspm policy on battery #
 
 			if [ $use_changing_pcie = "1" ]
 
@@ -990,11 +2024,9 @@ do
 
 			fi
 
-			# stop changing pcie aspm policy on battery
+			# stop changing pcie aspm policy on battery #
 
-			sudo modprobe -r uvcvideo
-
-			# start disable hal polling on device (experimental function)
+			# start disable hal polling on device (experimental function) #
 
 			if [ $use_hal_polling = "1" ]
 
@@ -1008,13 +2040,37 @@ do
 
 			fi
 
-			# stop disable hal polling on device (experimental function)
+			# stop disable hal polling on device (experimental function) #
 
-			sudo hdparm -B 1 -M 128 -S 1 -W 0 /dev/sda
+			# start block wifi using rfkill #
 
-			# start block bluetooth using rfkill
+			if [ $use_rfkill = "1" ] && [ $use_changing_wifi = "1" ] && [ $daemon_wifi = "1" ]
 
-			if [ $use_changing_bluetooth = "1" ] && [ $use_rfkill = "1" ]
+				then
+
+					if (( $(rfkill list wifi | grep -c "no") > "0" ))
+
+						then
+
+							sudo rfkill block wifi
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop block wifi using rfkill #
+
+			# start block bluetooth using rfkill #
+
+			if [ $use_rfkill = "1" ] && [ $use_changing_bluetooth = "1" ] && [ $daemon_bluetooth = "1" ]
 
 				then
 
@@ -1036,7 +2092,69 @@ do
 
 			fi
 
-			# stop block bluetooth using rfkill
+			# stop block bluetooth using rfkill #
+
+			# start setting power saving with hdparm #
+
+			if [ $use_hdparm = "1" ]
+
+				then
+
+					if (( $(sudo hdparm -B $hard_disk | grep -c "= 1") != "1" ))
+
+						then
+
+							sudo hdparm -B 1 $hard_disk
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(sudo hdparm -M $hard_disk | grep -c "= 128") != "1" ))
+
+						then
+
+							sudo hdparm -M 128 $hard_disk
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(sudo hdparm -W $hard_disk | grep -c "off") != "1" ))
+
+						then
+
+							sudo hdparm -W 0 $hard_disk
+
+						else
+
+							$skip
+
+					fi
+
+					if (( $(sudo hdparm -C $hard_disk | grep -c "standby") != "1" ))
+
+						then
+
+							sudo hdparm -S 1 $hard_disk
+
+						else
+
+							$skip
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# stop setting power saving with hdparm #
 
 		fi
 
@@ -1048,131 +2166,77 @@ do
 
 	fi
 
-	###################################################
-	#                                                 #
-	# Here is start point of anywayshot block of code #
-	#                                                 #
-	###################################################
+	########################################################
+	#                                                      #
+	# Here is start point of post-anywayshot block of code #
+	#                                                      #
+	########################################################
 
 	$longwait
 
-	# stop setvtrgb service #
-
-	if [[ $(systemctl status setvtrgb.service | grep -c inactive) = "1" ]]
+	if [ $use_systemd = "1" ]
 
 		then
 
-			$skip
+			# stop setvtrgb service #
+
+			if [ $stop_setvtrgb = "1" ] && [ $(systemctl status setvtrgb.service | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop setvtrgb.service
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop setvtrgb service #
+
+			# stop colord service #
+
+			if [ $stop_colord = "1" ] && [ $(systemctl status colord.service | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop colord.service
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop colord service #
+
+			# stop preload service #
+
+			if [ $stop_preload = "1" ] && [ $(systemctl status preload.service | grep -c inactive) != "1" ]
+
+				then
+
+					sudo systemctl stop preload.service
+
+				else
+
+					$skip
+
+			fi
+
+			# end of stop preload service #
 
 		else
 
-			sudo systemctl stop setvtrgb.service
-
-	fi
-
-	# end of stop setvtrgb service #
-
-	# stop rc-local service #
-
-	if [[ $(systemctl status rc-local.service | grep -c inactive) = "1" ]]
-
-		then
-
 			$skip
 
-		else
-
-			sudo systemctl stop rc-local.service
-
 	fi
 
-	# end of stop rc-local service #
-
-	# stop colord service #
-
-	if [[ $(systemctl status colord.service | grep -c inactive) = "1" ]]
-
-		then
-
-			$skip
-
-		else
-
-			sudo systemctl stop colord.service
-
-	fi
-
-	# end of stop colord service #
-
-	# stop keyboard-setup service #
-
-	if [[ $(systemctl status keyboard-setup.service | grep -c inactive) = "1" ]]
-
-		then
-
-			$skip
-
-		else
-
-			sudo systemctl stop keyboard-setup.service
-
-	fi
-
-	# end of stop keyboard-setup service #
-
-	# stop preload service #
-
-	if [[ $(systemctl status preload.service | grep -c inactive) = "1" ]]
-
-		then
-
-			$skip
-
-		else
-
-			sudo systemctl stop preload.service
-
-	fi
-
-	# end of stop preload service #
-
-	# stop avahi-daemon service #
-
-	if [[ $(systemctl status avahi-daemon.service | grep -c inactive) = "1" ]]
-
-		then
-
-			$skip
-
-		else
-
-			sudo systemctl stop avahi-daemon.service
-
-	fi
-
-	# end of stop avahi-daemon service #
-
-	# stop avahi-daemon socket #
-
-	if [[ $(systemctl status avahi-daemon.socket | grep -c inactive) = "1" ]]
-
-		then
-
-			$skip
-
-		else
-
-			sudo systemctl stop avahi-daemon.socket
-
-	fi
-
-	# end of stop avahi-daemon socket #
-
-	#################################################
-	#                                               #
-	# Here is end point of anywayshot block of code #
-	#                                               #
-	#################################################
+	######################################################
+	#                                                    #
+	# Here is end point of post-anywayshot block of code #
+	#                                                    #
+	######################################################
 
 done
 
