@@ -2,6 +2,6 @@
 
 > ! Not ready for use. Yet
 
-installation instructions coming soon
+Installation instructions coming soon
 
-you can test it
+You can test it on your own
