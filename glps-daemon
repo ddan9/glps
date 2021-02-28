@@ -6,143 +6,221 @@
 #                                            #
 ##############################################
 
-loop="1"
+# NOTICE:
+#
+# 0 - OFF | 1 - ON
+#
+# Dependencies are have indent
 
-skip="sleep 0"
+# daemon settings
 
-longwait="sleep 600"
+loop="1" # set daemon loop - DO NOT CHANGE!
 
-use_changing_brightness="1"
+skip="sleep 0" # function of skipping - DO NOT CHANGE!
 
-	oneshot_brightness="1"
+longwait="sleep 600" # quiz frequency in seconds - you can change it on your own
+
+# daemon settings
+
+# brightness settings
+
+use_changing_brightness="0"
+
+	oneshot_brightness="0"
 
 	daemon_brightness="0"
 
-	path_brightness="/sys/class/backlight/intel_backlight/brightness"
+	path_brightness="/sys/class/backlight/intel_backlight/brightness" # ATTENTION! You should change it on your own
 
-	ac_brightness="12421"
+	ac_brightness="12421" # ATTENTION! You should change it on your own
 
-	battery_brightness="0"
+	battery_brightness="0" # ATTENTION! You should change it on your own
 
-use_changing_kernel_params="1"
+# brightness settings
 
-use_powertop="1"
+# tray indicator settings
 
-use_modprobe="1"
+use_gtrayicon="0" # depends of gtrayicon package
 
-	use_changing_camera="1"
+# tray indicator settings
 
-use_wireless_powersaving="1"
+# notification settings
 
-	wireless_interface="wlp5s0"
+use_notify_send="0" # depends of notify-send package (libnotify-bin or notify-osd)
 
-	use_iw_pm="1"
+	use_notify_send_standalone="0"
 
-		use_iw_txpower="1"
+	use_notify_send_with_gtrayicon="0"
 
-			iw_default_txpower="200"
+# notification settings
 
-				iw_set_default_txpower="limit 200"
+# kernel settings
 
-			iw_powersave_txpower="1"
+use_changing_kernel_params="0"
 
-				iw_set_powersave_txpower="auto"
+	use_smt_power_saving="0"
 
-	use_iwconfig_pm="1"
+	use_mc_power_saving="0"
 
-		use_iwconfig_txpower="1"
+# kernel settings
 
-			iwconfig_default_txpower="200"
+# powertop settings
 
-				iwconfig_set_default_txpower="2"
+use_powertop="0" # depends of powertop package
 
-			iwconfig_powersave_txpower="1"
+# powertop settings
 
-				iwconfig_set_powersave_txpower="auto"
+# modprobe settings
 
-use_smt_power_saving="0"
+use_modprobe="0" # depends of modprobe package (kmod)
 
-use_mc_power_saving="0"
+	use_changing_camera="0"
 
-use_rfkill="1"
+# modprobe settings
 
-	use_changing_wifi="1"
+# wireless interface settings
 
-		oneshot_wifi="1"
+use_wireless_powersaving="0"
+
+	wireless_interface="wlp5s0" # ATTENTION! You should change it on your own
+
+	use_iw_pm="0"
+
+	use_iw_txpower="0"
+
+		iw_default_txpower="16" # ATTENTION! You should change it on your own
+
+			iw_set_default_txpower="auto" # ATTENTION! You should change it on your own
+
+		iw_powersave_txpower="1" # ATTENTION! You should change it on your own
+
+			iw_set_powersave_txpower="limit 100" # ATTENTION! You should change it on your own
+
+	use_iwconfig_pm="0"
+
+	use_iwconfig_txpower="0"
+
+		iwconfig_default_txpower="16" # ATTENTION! You should change it on your own
+
+			iwconfig_set_default_txpower="auto" # ATTENTION! You should change it on your own
+
+		iwconfig_powersave_txpower="1" # ATTENTION! You should change it on your own
+
+			iwconfig_set_powersave_txpower="1" # ATTENTION! You should change it on your own
+
+# wireless interface settings
+
+# rfkill settings
+
+use_rfkill="0"
+
+	use_changing_wifi="0"
+
+		oneshot_wifi="0"
 
 		daemon_wifi="0"
 
-	use_changing_bluetooth="1"
+	use_changing_bluetooth="0"
 
-		oneshot_bluetooth="1"
+		oneshot_bluetooth="0"
 
-		daemon_bluetooth="1"
+		daemon_bluetooth="0"
 
-use_changing_ipv6="1"
+# rfkill settings
 
-	use_sysctl="1"
+# ipv6 settings
 
-use_changing_scsi="1"
+use_changing_ipv6="0"
 
-	number_of_scsi_host="4"
+	use_sysctl="0"
+
+# ipv6 settings
+
+# scsi settings
+
+use_changing_scsi="0"
+
+	number_of_scsi_host="0" # ATTENTION! You should change it on your own
 
 	ac_scsi_host="max_performance"
 
 	battery_scsi_host="min_power"
 
-use_changing_governor="1"
+# scsi settings
 
-	use_cpufreq="1"
+# cpu governor settings
 
-	number_of_cores="4"
+use_changing_governor="0"
 
-	battery_governor="ondemand"
+	use_cpufreq="0" # depends of cpufreq-utils package
 
-	ac_governor="performance"
+	number_of_cores="4" # ATTENTION! You should change it on your own
 
-use_changing_pcie="1"
+	battery_governor="powersave" # ATTENTION! You should change it on your own
 
-use_hdparm="1"
+	ac_governor="performance" # ATTENTION! You should change it on your own
 
-	hard_disk="/dev/sda"
+# cpu governor settings
+
+# pcie settings
+
+use_changing_pcie="0"
+
+# pcie settings
+
+# hdparm settings
+
+use_hdparm="0" # depends of hdparm package
+
+	hard_disk="/dev/sda" # ATTENTION! You should change it on your own
+
+# hdparm settings
+
+# cdrom hal polling settings
 
 use_hal_polling="0"
 
 	hal_polling_device="/dev/cdrom"
 
-use_systemd="1"
+# cdrom hal polling settings
 
-	use_laptop_mode_tools="1"
+# systemd services settings
 
-		ac_laptop_mode="0"
+use_systemd="0"
 
-		battery_laptop_mode="5"
+	use_laptop_mode_tools="0" # depends of laptop-mode-tools package
 
-	use_cpufreqd="1"
+		ac_laptop_mode="0" # ATTENTION! You should change it on your own
 
-	use_samsung_tools="1"
+		battery_laptop_mode="5" # ATTENTION! You should change it on your own
 
-		oneshot_samsung_tools="1"
+	use_cpufreqd="0" # depends of cpufreqd package
+
+	use_samsung_tools="0" # depends of samsung-tools package
+
+		oneshot_samsung_tools="0"
 
 		daemon_samsung_tools="0"
 
-	use_autosuspend="1"
+	use_autosuspend="0"
 
-		path_battery_percentage="/sys/class/power_supply/BAT1/capacity"
+		path_battery_percentage="/sys/class/power_supply/BAT1/capacity" # ATTENTION! You should change it on your own
 
-		min_battery_percentage="5"
+		min_battery_percentage="0" # ATTENTION! You should change it on your own
 
-	stop_setvtrgb="1"
+	stop_setvtrgb="0"
 
-	stop_rclocal="1"
+	stop_rclocal="0"
 
-	stop_colord="1"
+	stop_colord="0"
 
-	stop_keyboardsetup="1"
+	stop_keyboardsetup="0"
 
-	stop_preload="1"
+	stop_preload="0" # depends of preload package
 
-	stop_avahidaemon="1"
+	stop_avahidaemon="0"
+
+# systemd services settings
 
 ########################################################
 #                                                      #
@@ -772,6 +850,94 @@ do
 		#                                            #
 		##############################################
 
+		# start of use performance tray indicator
+
+		if [ $use_gtrayicon = "1" ]
+
+			then
+
+				if [[ $(pgrep -f -c "GLPS-Daemon: performance") != "0" ]] && [[ $(pgrep -f -c "GLPS-Daemon: powersave") = "0" ]]
+
+					then
+
+						$skip 
+
+					else
+
+						if [[ $(pgrep -f -c "GLPS-Daemon: powersave") != "0" ]]
+
+							then
+
+								kill $(pgrep -f "GLPS-Daemon: powersave")
+					
+							else
+
+								$skip
+
+						fi
+
+						if [[ $(pgrep -f -c "GLPS-Daemon: performance") != "0" ]]
+
+							then
+
+								$skip
+
+							else
+
+								export DISPLAY=:0
+
+								export DISPLAY=:0.0
+
+								su $(who -q | grep -v =) -c 'DISPLAY=:0.0 gtrayicon --display=:0.0 --activate='' --deactivate='' --activate-icon=/usr/share/icons/gnome/scalable/emotes/face-devilish-symbolic.svg --deactivate-icon=/usr/share/icons/gnome/scalable/emotes/face-devilish-symbolic.svg --tooltip="GLPS-Daemon: performance" > /dev/null 2>&1 &'
+
+								if [ $use_notify_send = "1" ] && [ $use_notify_send_with_gtrayicon = "1" ]
+
+									then
+
+										export DISPLAY=:0
+
+										export DISPLAY=:0.0
+
+										su $(who -q | grep -v =) -c 'DISPLAY=:0.0 notify-send -i daemon "GPLS-Daemon" "Set performance settings"'
+
+									else
+
+										$skip
+
+								fi
+
+						fi
+
+				fi
+
+			else
+
+				$skip
+
+		fi
+
+		# end of use performance tray indicator
+
+		# start of performance notification send
+
+		if [ $use_notify_send = "1" ] && [ $use_notify_send_standalone = "1" ]
+
+			then
+
+				export DISPLAY=:0
+
+				export DISPLAY=:0.0
+
+				su $(who -q | grep -v =) -c 'DISPLAY=:0.0 notify-send -i daemon "GPLS-Daemon" "Set performance settings"'
+
+			else
+
+				$skip
+
+		fi
+
+		# end of performance notification send
+
 		# start changing laptop-mode setting #
 
 		if [ $use_laptop_mode_tools = "1" ]
@@ -998,21 +1164,21 @@ do
 
 						fi
 
-						if [ $use_iw_txpower = "1" ] && (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power:off") != "1" ))
+					else
+
+						$skip
+
+				fi
+
+				if [ $use_iw_txpower = "1" ] && (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power:off") != "1" ))
+
+					then
+
+						if (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power=$iw_default_txpower") != "1" ))
 
 							then
 
-								if (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power=$iw_default_txpower") != "1" ))
-
-									then
-
-										sudo iw dev $wireless_interface set txpower $iw_set_default_txpower
-
-									else
-
-										$skip
-
-								fi
+								sudo iw dev $wireless_interface set txpower $iw_set_default_txpower
 
 							else
 
@@ -1046,21 +1212,21 @@ do
 
 						fi
 
-						if [ $use_iwconfig_txpower = "1" ] && (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=off") != "1" ))
+					else
+
+						$skip
+
+				fi
+
+				if [ $use_iwconfig_txpower = "1" ] && (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=off") != "1" ))
+
+					then
+
+						if (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=$iwconfig_default_txpower") != "1" ))
 
 							then
 
-								if (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=$iwconfig_default_txpower") != "1" ))
-
-									then
-
-										sudo iwconfig $wireless_interface txpower $iwconfig_set_default_txpower
-
-									else
-
-										$skip
-
-								fi
+								sudo iwconfig $wireless_interface txpower $iwconfig_set_default_txpower
 
 							else
 
@@ -1444,6 +1610,94 @@ do
 
 		# end of autosuspend feature if battery percentage less than your minimum #
 
+			# start use powersave gtrayicon
+
+			if [ $use_gtrayicon = "1" ]
+
+				then
+
+					if [[ $(pgrep -f -c "GLPS-Daemon: powersave") != "0" ]] && [[ $(pgrep -f -c "GLPS-Daemon: performance") = "0" ]]
+
+						then
+
+							$skip 
+
+						else
+
+							if [[ $(pgrep -f -c "GLPS-Daemon: performance") != "0" ]]
+
+								then
+
+									kill $(pgrep -f "GLPS-Daemon: performance")
+							
+								else
+
+									$skip
+
+							fi
+
+							if [[ $(pgrep -f -c "GLPS-Daemon: powersave") != "0" ]]
+
+								then
+
+									$skip
+
+								else
+
+									export DISPLAY=:0
+
+									export DISPLAY=:0.0
+
+									su $(who -q | grep -v =) -c 'DISPLAY=:0.0 gtrayicon --display=:0.0 --activate='' --deactivate='' --activate-icon=/usr/share/icons/gnome/scalable/emotes/face-devilish-symbolic.svg --deactivate-icon=/usr/share/icons/gnome/scalable/emotes/face-devilish-symbolic.svg --tooltip="GLPS-Daemon: powersave" > /dev/null 2>&1 &'
+
+									if [ $use_notify_send = "1" ] && [ $use_notify_send_with_gtrayicon = "1" ]
+
+										then
+
+											export DISPLAY=:0
+
+											export DISPLAY=:0.0
+
+											su $(who -q | grep -v =) -c 'DISPLAY=:0.0 notify-send -i daemon "GPLS-Daemon" "Set powersave settings"'
+
+										else
+
+											$skip
+
+									fi
+
+							fi
+
+					fi
+
+				else
+
+					$skip
+
+			fi
+
+			# end use powersave gtrayicon
+
+			# start of powersave notification send
+
+			if [ $use_notify_send = "1" ] && [ $use_notify_send_standalone = "1" ]
+
+				then
+
+					export DISPLAY=:0
+
+					export DISPLAY=:0.0
+
+					su $(who -q | grep -v =) -c 'DISPLAY=:0.0 notify-send -i daemon "GPLS-Daemon" "Set powersave settings"'
+
+				else
+
+					$skip
+
+			fi
+
+			# end of powersave notification send
+
 			# start samsung-tools service #
 
 			if [ $use_samsung_tools = "1" ] && [ $daemon_samsung_tools = "1" ]
@@ -1736,21 +1990,21 @@ do
 
 							fi
 
-							if [ $use_iw_txpower = "1" ] && (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power:off") != "1" ))
+						else
+
+							$skip
+
+					fi
+
+					if [ $use_iw_txpower = "1" ] && (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power:off") != "1" ))
+
+						then
+
+							if (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power=$iw_powersave_txpower") != "1" ))
 
 								then
 
-									if (( $(sudo iwlist $wireless_interface txpower | grep -c "Tx-Power=$iw_powersave_txpower") != "1" ))
-
-										then
-
-											sudo iw dev $wireless_interface set txpower $iw_set_powersave_txpower
-
-										else
-
-											$skip
-
-									fi
+									sudo iw dev $wireless_interface set txpower $iw_set_powersave_txpower
 
 								else
 
@@ -1784,21 +2038,21 @@ do
 
 							fi
 
-							if [ $use_iwconfig_txpower = "1" ] && (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=off") != "1" ))
+						else
+
+							$skip
+
+					fi
+
+					if [ $use_iwconfig_txpower = "1" ] && (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=off") != "1" ))
+
+						then
+
+							if (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=$iwconfig_powersave_txpower") != "1" ))
 
 								then
 
-									if (( $(sudo iwconfig $wireless_interface | grep -c "Tx-Power=$iwconfig_powersave_txpower") != "1" ))
-
-										then
-
-											sudo iwconfig $wireless_interface txpower $iwconfig_set_powersave_txpower
-
-										else
-
-											$skip
-
-									fi
+									sudo iwconfig $wireless_interface txpower $iwconfig_set_powersave_txpower
 
 								else
 
