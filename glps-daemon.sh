@@ -1,5 +1,47 @@
 #!/bin/bash
 
+###################################################################
+#                                                                 #
+# CODE MAP:                                                       #
+#                                                                 #
+# 0) Comments                                                     #
+#                                                                 #
+# 1) Preload and settings block of code (with start & end points) #
+#                                                                 #
+# 2) Functions block of code (with start & end points)            #
+#                                                                 #
+# 3) Oneshot block of code (with start & end points)              #
+#                                                                 #
+#    - On ac block of code (with start & end points)              #
+#                                                                 #
+#    - On battery block of code (with start & end points)         #
+#                                                                 #
+# 4) Daemon block of code (with start & end points)               #
+#                                                                 #
+#    - Pre-anywayshot block of code (with start & end points)     #
+#                                                                 #
+#    - On ac block of code (with start & end points)              #
+#                                                                 #
+#    - On battery block of code (with start & end points)         #
+#                                                                 #
+#    - Post-anywayshot block of code (with start & end points)    #
+#                                                                 #
+###################################################################
+
+###################################################################################################################
+#                                                                                                                 #
+# NOTICE:                                                                                                         #
+#                                                                                                                 #
+# If you want to add (or change) something yours, you can easily do it:                                           #
+#                                                                                                                 #
+# 1) Add yours function (functions block of code)                                                                 #
+#                                                                                                                 #
+# 2) Add calls of yours function in needed block of code (oneshot or daemon ( pre/ac/battery/post) block of code) #
+#                                                                                                                 #
+# 3) Add settings for yours function if it needed (preload and settings block of code)                            #
+#                                                                                                                 #
+###################################################################################################################
+
 ##############################################
 #                                            #
 # Here is preload and settings block of code #
@@ -76,9 +118,19 @@ use_changing_kernel_params="1" # kernel changing parameters function; statements
 
 # kernel settings (end) #
 
+# custom battery life (cycle) extender settings (start) #
+
+use_custom_battery_life_extender="1" # ATTENTION! You must check this item yourself in your system; battery life (cycle) extender funcion in BIOS if hardware support; statements: 0/1 #
+
+	battery_life_extender_path="/sys/devices/platform/samsung/battery_life_extender" # ATTENTION! You must check this item yourself in your system #
+
+	battery_life_extender_enable_percentage="100" # enable battery life extender after that battery percentage; statements: number #
+
+# custom battery life (cycle) extender settings (end) #
+
 # fan speed settings (start) #
 
-use_changing_fan="1" # change fan speed function if your hardware support it; statements: 0/1 #
+use_changing_fan="1" # ATTENTION! You must check this item yourself in your system; change fan speed function if your hardware support it; statements: 0/1 #
 
 	fan_changing_path="/sys/devices/platform/samsung/performance_level" # ATTENTION! You must check this item yourself in your system #
 
@@ -2378,7 +2430,7 @@ function daemon.change_number_online_cores()
 
 							done
 
-							for (( c = $ac_number_of_online_cores; c < $current_total_number_of_cores; c++ ))						
+							for (( c = $ac_number_of_online_cores; c < $current_total_number_of_cores; c++ ))
 
 							do
 
@@ -2416,7 +2468,7 @@ function daemon.change_number_online_cores()
 
 							done
 
-							for (( c = $ac_number_of_online_cores; c < $current_total_number_of_cores; c++ ))						
+							for (( c = $ac_number_of_online_cores; c < $current_total_number_of_cores; c++ ))
 
 							do
 
@@ -2514,7 +2566,7 @@ function daemon.change_number_online_cores()
 
 							done
 
-							for (( c = $battery_number_of_online_cores; c < $current_total_number_of_cores; c++ ))						
+							for (( c = $battery_number_of_online_cores; c < $current_total_number_of_cores; c++ ))
 
 							do
 
@@ -2552,7 +2604,7 @@ function daemon.change_number_online_cores()
 
 							done
 
-							for (( c = $battery_number_of_online_cores; c < $current_total_number_of_cores; c++ ))						
+							for (( c = $battery_number_of_online_cores; c < $current_total_number_of_cores; c++ ))
 
 							do
 
@@ -3160,6 +3212,88 @@ function daemon.hdparm.change_power_saving()
 
 # function of daemon changing power saving statements of hard disk with hdparm (end) #
 
+# custom battery life (cycle) extender function (start) #
+
+function daemon.custom_battery_life_extender()
+
+{
+
+	if on_ac_power;
+
+		then
+
+			if [ $use_custom_battery_life_extender = "1" ]
+
+				then
+
+					if (( $(cat $path_battery_percentage) >= $battery_life_extender_enable_percentage ))
+
+						then
+
+							if [ $(cat $battery_life_extender_path) != "1" ]
+
+								then
+
+									echo 1 > $battery_life_extender_path
+
+								else
+
+									skip
+
+							fi
+
+						else
+
+							if [ $(cat $battery_life_extender_path) != "0" ]
+
+								then
+
+									echo 0 > $battery_life_extender_path
+
+								else
+
+									skip
+
+							fi
+
+					fi
+
+				else
+
+					skip
+
+			fi
+
+		else
+
+			if [ $use_custom_battery_life_extender = "1" ]
+
+				then
+
+					if [ $(cat $battery_life_extender_path) != "0" ]
+
+						then
+
+							echo 0 > $battery_life_extender_path
+
+						else
+
+							skip
+
+					fi
+
+				else
+
+					skip
+
+			fi
+
+	fi
+
+}
+
+# custom battery life (cycle) extender function (end) #
+
 #############################################
 #                                           #
 # Here is end point functions block of code #
@@ -3274,6 +3408,8 @@ do
 
 			daemon.kernel.change_parameters # daemon ac change kernel parameters as native #
 
+			daemon.custom_battery_life_extender # daemon ac custom battery life extender as native #
+
 			daemon.change_brightness # daemon ac change brightness as native #
 
 			daemon.change_fan_speed # daemon ac change fan speed as native #
@@ -3345,6 +3481,8 @@ do
 					daemon.change_laptop_mode # daemon battery change laptop mode setting as native #
 
 					daemon.kernel.change_parameters # daemon battery change kernel parameters as native #
+
+					daemon.custom_battery_life_extender # daemon battery custom battery life extender as native #
 
 					daemon.change_brightness # daemon battery change brightness as native #
 
