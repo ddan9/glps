@@ -124,7 +124,7 @@ use_custom_battery_life_extender="1" # ATTENTION! You must check this item yours
 
 	battery_life_extender_path="/sys/devices/platform/samsung/battery_life_extender" # ATTENTION! You must check this item yourself in your system #
 
-	battery_life_extender_enable_percentage="100" # enable battery life extender after that battery percentage; statements: number #
+	battery_life_extender_enable_percentage="95" # enable battery life extender after that battery percentage; statements: number #
 
 # custom battery life (cycle) extender settings (end) #
 
