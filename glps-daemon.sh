@@ -120,7 +120,7 @@ use_changing_kernel_params="1" # kernel changing parameters function; statements
 
 # custom battery life (cycle) extender settings (start) #
 
-use_custom_battery_life_extender="1" # ATTENTION! You must check this item yourself in your system; battery life (cycle) extender funcion in BIOS if hardware support; statements: 0/1 #
+use_custom_battery_life_extender="1" # ATTENTION! You must check this item yourself in your system; battery life (cycle) extender funcion in BIOS if hardware support; depends of polling time; statements: 0/1 #
 
 	battery_life_extender_path="/sys/devices/platform/samsung/battery_life_extender" # ATTENTION! You must check this item yourself in your system #
 
