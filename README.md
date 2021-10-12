@@ -77,3 +77,5 @@ It can works with:
 - avahi-daemon
 
 - ntp
+
+A detailed description will come later
