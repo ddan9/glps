@@ -74,3 +74,4 @@ A detailed description will come later
 - сменить запускаемый скрипт через systemctl
 - на некоторые функции сделать параметры if on_battery и on_ac
 - прелоад через инициализацию некоторых вещей (переменных)
+- profiles with variables by bash source
