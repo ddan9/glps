@@ -75,3 +75,4 @@ A detailed description will come later
 - на некоторые функции сделать параметры if on_battery и on_ac
 - прелоад через инициализацию некоторых вещей (переменных)
 - profiles with variables by bash source
+- реагирование на plug-in-ac (мб через systemd)
