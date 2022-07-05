@@ -76,3 +76,4 @@ A detailed description will come later
 - прелоад через инициализацию некоторых вещей (переменных)
 - profiles with variables by bash source
 - реагирование на plug-in-ac (мб через systemd)
+- отдельная проверка и переменная на питание
