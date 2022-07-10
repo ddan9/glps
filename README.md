@@ -77,3 +77,4 @@ A detailed description will come later
 - profiles with variables by bash source
 - реагирование на plug-in-ac (мб через systemd)
 - отдельная проверка и переменная на питание
+- раздробить скрипт на отдельные библиотеки/модули для удобства
